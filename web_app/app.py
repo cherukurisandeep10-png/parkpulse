@@ -219,12 +219,20 @@ with tab2:
         st.caption("Data source: `mart_district_parking_stats`")
         
         display_districts = df_districts[["district", "currently_parked_count", "active_driving_count", "avg_parking_duration_hrs", "parking_utilization_rate"]].copy()
-        display_districts.columns = ["District", "Parked", "Driving", "Avg Hrs Parked", "Utilization %"]
-        
-        st.dataframe(
-            display_districts.style.background_gradient(subset=["Utilization %"], cmap="Blues"),
+     st.dataframe(
+            display_districts,
+            column_config={
+                "Utilization %": st.column_config.ProgressColumn(
+                    "Utilization %",
+                    help="Percentage of tracked vehicles currently parked in this district",
+                    format="%.1f%%",
+                    min_value=0,
+                    max_value=100,
+                )
+            },
             use_container_width=True,
-            height=380
+            hide_index=True,
+            height=380,
         )
 
 # ==========================================
