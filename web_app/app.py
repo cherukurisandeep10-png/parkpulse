@@ -1,6 +1,6 @@
 # Author: Sandeep Chowdary
-# Project: ParkPulse — Live Smart City Bikeshare & EV Telemetry Portal
-# Description: Real-time IoT sensor telemetry dashboard fetching live GBFS public data feeds.
+# Project: ParkPulse - Smart City Mobility & Vehicle Telemetry
+# Description: Real-time public transportation and docking sensor analytics for urban mobility networks.
 
 import streamlit as st
 import pandas as pd
@@ -11,115 +11,159 @@ import json
 import time
 
 st.set_page_config(
-    page_title="ParkPulse | Live IoT Telemetry Portal",
-    page_icon="⚡",
+    page_title="ParkPulse | Mobility Telemetry",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Clean Modern SaaS / Light Theme UI Styling
+# Vibrant, Human-Designed SaaS Palette (Zero AI Emoji Spam)
 st.markdown("""
     <style>
-    /* Sleek Metric Cards */
-    .metric-card {
-        background-color: #FFFFFF;
-        padding: 1.4rem;
-        border-radius: 10px;
-        border: 1px solid #E2E8F0;
-        border-left: 5px solid #2563EB;
-        color: #0F172A;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    /* Clean main background */
+    .stApp {
+        background-color: #F8FAFC;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
-    .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
-    }
-    .metric-title {
-        font-size: 0.85rem;
-        color: #64748B;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-        margin-bottom: 0.4rem;
-    }
-    .metric-value {
+    
+    /* Brand Header in Sidebar */
+    .brand-title {
         font-size: 1.8rem;
         font-weight: 800;
-        color: #0F172A;
+        background: linear-gradient(90deg, #2563EB, #7C3AED);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.2rem;
     }
-    .metric-sub {
+    .brand-subtitle {
+        font-size: 0.85rem;
+        color: #64748B;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Vibrant Multi-Color KPI Cards */
+    .card-orange {
+        background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        color: #FFFFFF;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.25);
+        transition: transform 0.2s ease;
+    }
+    .card-green {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        color: #FFFFFF;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+        transition: transform 0.2s ease;
+    }
+    .card-blue {
+        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        color: #FFFFFF;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
+        transition: transform 0.2s ease;
+    }
+    .card-purple {
+        background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        color: #FFFFFF;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+        transition: transform 0.2s ease;
+    }
+    .card-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        font-weight: 600;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+    .card-value {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.2rem;
+    }
+    .card-sub {
         font-size: 0.8rem;
-        color: #3B82F6;
-        margin-top: 0.4rem;
+        opacity: 0.85;
         font-weight: 500;
     }
     
-    /* Status Badges */
-    .status-active {
-        background-color: #DCFCE7;
-        color: #166534;
-        border: 1px solid #BBF7D0;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.8rem;
-        display: inline-block;
-    }
-    .status-low {
-        background-color: #FEE2E2;
-        color: #991B1B;
-        border: 1px solid #FECACA;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.8rem;
-        display: inline-block;
-    }
-    
-    /* Station Details Lookup Box */
-    .station-box {
-        background-color: #F8FAFC;
-        border: 1px solid #CBD5E1;
-        border-radius: 10px;
-        padding: 1.5rem;
-        color: #0F172A;
+    /* Station Detail Panel */
+    .station-panel {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 1.8rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         margin-top: 1rem;
         margin-bottom: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+    .station-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 0.3rem;
+    }
+    .badge-online {
+        background-color: #DCFCE7;
+        color: #15803D;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .badge-offline {
+        background-color: #FEE2E2;
+        color: #B91C1C;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
     
     /* Streamlit Tabs Styling */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 15px;
+        gap: 12px;
+        border-bottom: 2px solid #E2E8F0;
     }
     .stTabs [data-baseweb="tab"] {
         height: 48px;
-        background-color: #F1F5F9;
-        border-radius: 8px 8px 0px 0px;
-        padding: 10px 20px;
-        color: #475569;
+        background-color: transparent;
+        border-radius: 6px 6px 0px 0px;
+        padding: 10px 22px;
+        color: #64748B;
         font-weight: 600;
-        border: 1px solid #E2E8F0;
-        border-bottom: none;
+        font-size: 0.95rem;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #FFFFFF !important;
+        background-color: #EFF6FF !important;
         color: #2563EB !important;
-        border-top: 3px solid #2563EB !important;
+        border-bottom: 3px solid #2563EB !important;
         font-weight: 700;
+    }
+    
+    /* Sidebar branding */
+    section[data-testid="stSidebar"] {
+        background-color: #FFFFFF;
+        border-right: 1px solid #E2E8F0;
     }
     </style>
 """, unsafe_allow_html=True)
 
 
-def render_metric_card(title, value, subtitle=""):
+def render_vibrant_card(style_class, title, value, subtitle=""):
     st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">{title}</div>
-            <div class="metric-value">{value}</div>
-            <div class="metric-sub">{subtitle}</div>
+        <div class="{style_class}">
+            <div class="card-title">{title}</div>
+            <div class="card-value">{value}</div>
+            <div class="card-sub">{subtitle}</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -191,61 +235,59 @@ def fetch_live_city_telemetry(city_name):
 
 # Sidebar
 with st.sidebar:
-    st.title("⚡ ParkPulse")
-    st.caption("Real-Time Smart City IoT Telemetry")
-    st.divider()
+    st.markdown('<div class="brand-title">ParkPulse</div>', unsafe_allow_html=True)
+    st.markdown('<div class="brand-subtitle">Urban Mobility Telemetry</div>', unsafe_allow_html=True)
     
-    selected_city = st.selectbox("Select Live City Sensor Feed:", list(CITY_FEEDS.keys()))
+    selected_city = st.selectbox("Metropolitan Network", list(CITY_FEEDS.keys()))
     
-    if st.button("🔄 Refresh Live Sensors", help="Fetch immediate real-time IoT status from city docking stations"):
+    if st.button("Refresh Sensor Feed", use_container_width=True):
         st.cache_data.clear()
-        st.success("Fetched latest live physical sensor feed!")
+        st.success("Sensor data updated")
         
     st.divider()
-    st.markdown("### System Architecture")
-    st.markdown("- **Mode:** 100% Real-Time IoT Sensors")
-    st.markdown("- **Protocol:** GBFS Public Feeds")
-    st.markdown("- **Engine:** In-Memory Pandas OLAP")
+    st.markdown("**System Details**")
+    st.markdown("<span style='color:#64748B; font-size:0.85rem;'>Protocol: GBFS Live JSON<br>Engine: In-Memory Pandas<br>Refresh Rate: 30 Seconds</span>", unsafe_allow_html=True)
     st.divider()
-    st.caption("Author: **Sandeep Chowdary**\n\nColumbus, Ohio")
+    st.markdown("**Developed by Sandeep Chowdary**")
+    st.markdown("<span style='color:#64748B; font-size:0.85rem;'>Columbus, Ohio</span>", unsafe_allow_html=True)
 
 # Load real-time data
-with st.spinner(f"Connecting to live IoT sensors in {selected_city}..."):
+with st.spinner(f"Connecting to mobility sensors in {selected_city}..."):
     try:
         df_stations, api_latency = fetch_live_city_telemetry(selected_city)
         feed_error = False
     except Exception as e:
         feed_error = True
-        st.error(f"Failed to connect to live sensor feed: {e}")
+        st.error(f"Failed to retrieve mobility sensor data: {e}")
         df_stations = pd.DataFrame()
         api_latency = 0
 
-st.title(f"⚡ ParkPulse — Live Smart City Telemetry: {selected_city.split(' (')[0]}")
-st.markdown("Direct ingestion of physical IoT docking sensor feeds, monitoring real-time vehicle availability, battery status, and spatial utilization.")
+st.title(f"ParkPulse - Smart City Mobility: {selected_city.split(' (')[0]}")
+st.markdown("<p style='color:#475569; font-size:1.05rem; margin-top:-0.5rem; margin-bottom:1.5rem;'>Real-time public transportation and docking sensor analytics for urban mobility networks.</p>", unsafe_allow_html=True)
 
 if not feed_error and len(df_stations) > 0:
     tab1, tab2, tab3 = st.tabs([
-        "📍 Street & Station Lookup", 
-        "🗺️ Live City Heatmap & Occupancy", 
-        "⚡ API Telemetry Inspector"
+        "Station Lookup & Telemetry", 
+        "Network Map & Occupancy", 
+        "API Response Metrics"
     ])
     
     # ==========================================
-    # TAB 1: STREET & STATION LOOKUP
+    # TAB 1: STATION LOOKUP
     # ==========================================
     with tab1:
-        st.subheader("Live Station Sensor Lookup")
-        st.write("Search any street name, landmark, or station ID to view live available vehicles and open docking capacity right now.")
+        st.markdown("### Individual Station Diagnostics")
+        st.write("Search any street intersection, landmark, or station identifier to inspect real-time vehicle availability and empty docking capacity.")
         
         col_search, col_hints = st.columns([2, 1])
         with col_search:
             search_query = st.text_input(
-                "Enter Street Name or Station:", 
+                "Search Street or Landmark:", 
                 value=df_stations.iloc[0]["name"],
-                placeholder="e.g., Broadway, Michigan Ave, or Times Sq"
+                placeholder="Example: Broadway, Michigan Ave, or Market St"
             ).strip().lower()
         with col_hints:
-            st.info(f"💡 Try typing a street like `{df_stations.iloc[0]['name'].split(' & ')[0]}` or `{df_stations.iloc[1]['name'].split(' & ')[0]}`.")
+            st.info(f"Suggestion: Try searching `{df_stations.iloc[0]['name'].split(' & ')[0]}` or `{df_stations.iloc[1]['name'].split(' & ')[0]}`.")
             
         match_df = df_stations[
             df_stations["name"].str.lower().str.contains(search_query) |
@@ -254,23 +296,39 @@ if not feed_error and len(df_stations) > 0:
         
         if len(match_df) > 0:
             station = match_df.iloc[0]
-            status_badge = '<span class="status-active">🟢 ACTIVE DOCKING STATION</span>' if station["is_renting"] == 1 else '<span class="status-low">🔴 OFFLINE / DISABLED</span>'
+            badge_class = "badge-online" if station["is_renting"] == 1 else "badge-offline"
+            badge_text = "ONLINE - ACTIVE DOCKS" if station["is_renting"] == 1 else "OFFLINE - MAINTENANCE"
             
             st.markdown(f"""
-                <div class="station-box">
-                    <h3 style="margin-top:0; color:#2563EB;">📍 {station['name']} — ID: <b>{station['station_id']}</b></h3>
-                    <p><b>Status:</b> {status_badge} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Total Station Capacity:</b> {station['capacity']} docks</p>
-                    <hr style="border-color: #CBD5E1;">
-                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 1rem;">
-                        <div>🚲 <b>Available Vehicles:</b> <code style="color:#1D4ED8; font-size:1.1rem; font-weight:700;">{station['num_bikes_available']}</code></div>
-                        <div>🅿️ <b>Open Empty Docks:</b> <code style="color:#15803D; font-size:1.1rem; font-weight:700;">{station['num_docks_available']}</code></div>
-                        <div>📊 <b>Station Occupancy:</b> <code style="color:#0284C7; font-size:1.1rem; font-weight:700;">{station['occupancy_pct']}%</code></div>
-                        <div>📍 <b>GPS Coordinates:</b> <code>{station['lat']}, {station['lon']}</code></div>
+                <div class="station-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                        <div class="station-name">{station['name']}</div>
+                        <span class="{badge_class}">{badge_text}</span>
+                    </div>
+                    <p style="color:#64748B; font-size:0.9rem; margin-top:0.2rem;">Station ID: <b>{station['station_id']}</b> | Total Dock Capacity: <b>{station['capacity']}</b></p>
+                    <hr style="border-color: #E2E8F0; margin: 1.2rem 0;">
+                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; text-align: center;">
+                        <div>
+                            <div style="font-size:0.8rem; color:#64748B; text-transform:uppercase; font-weight:600;">Available Vehicles</div>
+                            <div style="font-size:1.8rem; font-weight:800; color:#2563EB;">{station['num_bikes_available']}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.8rem; color:#64748B; text-transform:uppercase; font-weight:600;">Open Empty Docks</div>
+                            <div style="font-size:1.8rem; font-weight:800; color:#10B981;">{station['num_docks_available']}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.8rem; color:#64748B; text-transform:uppercase; font-weight:600;">Station Occupancy</div>
+                            <div style="font-size:1.8rem; font-weight:800; color:#8B5CF6;">{station['occupancy_pct']}%</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.8rem; color:#64748B; text-transform:uppercase; font-weight:600;">Coordinates</div>
+                            <div style="font-size:1.1rem; font-weight:600; color:#334155; margin-top:0.4rem;">{station['lat']}, {station['lon']}</div>
+                        </div>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
             
-            st.markdown("#### Station Spatial Location")
+            st.markdown("#### Geographic Positioning")
             view_state = pdk.ViewState(
                 latitude=station["lat"],
                 longitude=station["lon"],
@@ -283,25 +341,25 @@ if not feed_error and len(df_stations) > 0:
                 data=pd.DataFrame([station]),
                 get_position=["lon", "lat"],
                 get_color=[37, 99, 235, 255],
-                get_radius=60,
+                get_radius=65,
                 pickable=True,
                 stroked=True,
                 filled=True,
-                radius_min_pixels=10,
+                radius_min_pixels=12,
                 radius_max_pixels=25,
-                line_width_min_pixels=2,
+                line_width_min_pixels=3,
                 get_line_color=[255, 255, 255]
             )
             
-            st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": f"Station: {station['name']}\nAvailable Bikes: {station['num_bikes_available']}\nOpen Docks: {station['num_docks_available']}"}))
+            st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": f"Station: {station['name']}\nAvailable Vehicles: {station['num_bikes_available']}\nOpen Docks: {station['num_docks_available']}"}))
         else:
             st.warning(f"No active station found matching '{search_query}'.")
             
     # ==========================================
-    # TAB 2: LIVE CITY HEATMAP & OCCUPANCY
+    # TAB 2: NETWORK MAP & OCCUPANCY
     # ==========================================
     with tab2:
-        st.subheader("City-Wide Sensor Overview")
+        st.markdown("### Network Mobility KPIs")
         
         kpi1, kpi2, kpi3, kpi4 = st.columns(4)
         total_stations = len(df_stations)
@@ -310,24 +368,24 @@ if not feed_error and len(df_stations) > 0:
         avg_occ = round(df_stations["occupancy_pct"].mean(), 1)
         
         with kpi1:
-            render_metric_card("Active IoT Stations", f"{total_stations:,}", "Broadcasting live status")
+            render_vibrant_card("card-orange", "Active IoT Stations", f"{total_stations:,}", "Broadcasting live sensors")
         with kpi2:
-            render_metric_card("Available Vehicles", f"{total_bikes:,}", "Ready for user checkout")
+            render_vibrant_card("card-green", "Available Vehicles", f"{total_bikes:,}", "Ready for user checkout")
         with kpi3:
-            render_metric_card("Open Docking Spots", f"{total_docks:,}", "Available for return")
+            render_vibrant_card("card-blue", "Open Docking Spots", f"{total_docks:,}", "Available for return")
         with kpi4:
-            render_metric_card("Avg Network Occupancy", f"{avg_occ}%", "Real-time fleet balance")
+            render_vibrant_card("card-purple", "Network Occupancy", f"{avg_occ}%", "Real-time system balance")
             
         st.markdown("---")
         
         col_map, col_table = st.columns([3, 2])
         
         with col_map:
-            st.markdown("#### Live Geospatial Distribution")
-            st.caption("Blue = Available Vehicles | Red = Empty Dock Station")
+            st.markdown("#### Live Spatial Distribution")
+            st.caption("Blue = Active Available Vehicles | Red = Low Capacity / Empty Docks")
             
             map_df = df_stations.copy()
-            map_df["color"] = map_df["occupancy_pct"].apply(lambda p: [37, 99, 235, 200] if p > 20 else [220, 38, 38, 220])
+            map_df["color"] = map_df["occupancy_pct"].apply(lambda p: [37, 99, 235, 200] if p > 15 else [239, 68, 68, 220])
             
             city_coords = CITY_FEEDS[selected_city]
             city_view = pdk.ViewState(
@@ -342,20 +400,20 @@ if not feed_error and len(df_stations) > 0:
                 data=map_df,
                 get_position=["lon", "lat"],
                 get_color="color",
-                get_radius=100,
+                get_radius=110,
                 pickable=True,
                 radius_min_pixels=4,
-                radius_max_pixels=12,
+                radius_max_pixels=14,
             )
             
-            st.pydeck_chart(pdk.Deck(layers=[fleet_layer], initial_view_state=city_view, tooltip={"text": "Station: {name}\nAvailable: {num_bikes_available} bikes\nOpen Docks: {num_docks_available}\nOccupancy: {occupancy_pct}%"}))
+            st.pydeck_chart(pdk.Deck(layers=[fleet_layer], initial_view_state=city_view, tooltip={"text": "Station: {name}\nAvailable: {num_bikes_available} vehicles\nOpen Docks: {num_docks_available}\nOccupancy: {occupancy_pct}%"}))
             
         with col_table:
-            st.markdown("#### Live Station Leaderboard")
-            st.caption("Sorted by real-time vehicle availability")
+            st.markdown("#### Station Utilization Leaderboard")
+            st.caption("Sorted chronologically by active vehicle availability")
             
             display_df = df_stations[["name", "num_bikes_available", "num_docks_available", "occupancy_pct"]].copy()
-            display_df.columns = ["Station Name", "Bikes", "Docks", "Occupancy %"]
+            display_df.columns = ["Station Name", "Vehicles", "Docks", "Occupancy %"]
             
             st.dataframe(
                 display_df,
@@ -370,30 +428,29 @@ if not feed_error and len(df_stations) > 0:
                 },
                 use_container_width=True,
                 hide_index=True,
-                height=400,
+                height=420,
             )
             
     # ==========================================
-    # TAB 3: API TELEMETRY INSPECTOR
+    # TAB 3: API RESPONSE METRICS
     # ==========================================
     with tab3:
-        st.subheader("Direct-to-Consumer IoT Architecture")
+        st.markdown("### Architecture & Ingestion Diagnostics")
         st.markdown("""
-            Unlike traditional batch pipelines that stage static data overnight, this portal demonstrates **real-time API telemetry ingestion**.
-            When a user selects a city, the engine establishes a live HTTP connection to physical street docking sensors, parses GBFS JSON payloads in memory, and renders sub-second spatial analytics.
+            This mobility platform operates on a **direct-to-consumer real-time telemetry model**. Instead of relying on static nightly batch pipelines or simulated CSV files, the backend connects directly to municipal IoT sensor endpoints over HTTP, parsing live GBFS JSON specifications into in-memory data frames.
         """)
         
         col_info1, col_info2 = st.columns(2)
         with col_info1:
-            st.markdown("#### Live API Performance")
-            st.info(f"⚡ **Last API Fetch Latency:** `{api_latency} ms` (Fetched 2 live JSON feeds simultaneously)")
-            st.markdown(f"**Primary Endpoint:** `{CITY_FEEDS[selected_city]['status']}`")
+            st.markdown("#### HTTP Ingestion Performance")
+            st.info(f"**Last API Response Latency:** `{api_latency} ms`\n\nSimultaneous retrieval of both metadata (`station_information.json`) and real-time status (`station_status.json`).")
+            st.markdown(f"**Target Host:** `{CITY_FEEDS[selected_city]['status']}`")
             
         with col_info2:
-            st.markdown("#### Why Real-Time Ingestion Matters")
-            st.success("Zero data stale-time. 100% physical world accuracy.")
-            st.markdown("In smart city transportation, vehicle availability changes every second. By bypassing intermediate batch staging tables, this architecture guarantees that users and dispatchers see exact, real-world physical dock occupancy.")
+            st.markdown("#### Engineering Advantages")
+            st.success("Zero Stale Data. 100% Physical Ground Truth.")
+            st.markdown("In high-turnover urban mobility networks, vehicle availability changes every second. Direct API ingestion eliminates staging latency, ensuring dispatchers and riders observe exact real-world sensor states.")
             
         st.divider()
-        st.markdown("#### Raw JSON DataFrame Inspector")
+        st.markdown("#### Raw JSON DataFrame Inspection")
         st.dataframe(df_stations.head(50), use_container_width=True)
