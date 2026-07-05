@@ -17,118 +17,98 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Cyberpunk / Dark-Mode AI UI Styling
+# Clean Modern SaaS / Light Theme UI Styling
 st.markdown("""
     <style>
-    /* Main App Background */
-    .stApp {
-        background-color: #0E1117;
-        color: #E6EDF3;
-    }
-    
     /* Sleek Metric Cards */
     .metric-card {
-        background: linear-gradient(135deg, #161B22 0%, #1E242C 100%);
+        background-color: #FFFFFF;
         padding: 1.4rem;
-        border-radius: 12px;
-        border: 1px solid #30363D;
-        border-left: 5px solid #00F0FF;
-        color: #FFFFFF;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        border-left: 5px solid #2563EB;
+        color: #0F172A;
         margin-bottom: 1rem;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .metric-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 32px rgba(0, 240, 255, 0.15);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
     }
     .metric-title {
         font-size: 0.85rem;
-        color: #8B949E;
+        color: #64748B;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
         font-weight: 600;
         margin-bottom: 0.4rem;
     }
     .metric-value {
         font-size: 1.8rem;
         font-weight: 800;
-        color: #FFFFFF;
-        text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        color: #0F172A;
     }
     .metric-sub {
         font-size: 0.8rem;
-        color: #58A6FF;
+        color: #3B82F6;
         margin-top: 0.4rem;
+        font-weight: 500;
     }
     
     /* Status Badges */
     .status-active {
-        background: rgba(42, 157, 143, 0.2);
-        color: #2A9D8F;
-        border: 1px solid #2A9D8F;
+        background-color: #DCFCE7;
+        color: #166534;
+        border: 1px solid #BBF7D0;
         padding: 0.3rem 0.8rem;
         border-radius: 20px;
         font-weight: 700;
         font-size: 0.8rem;
         display: inline-block;
-        letter-spacing: 0.5px;
     }
     .status-low {
-        background: rgba(230, 57, 70, 0.2);
-        color: #E63946;
-        border: 1px solid #E63946;
+        background-color: #FEE2E2;
+        color: #991B1B;
+        border: 1px solid #FECACA;
         padding: 0.3rem 0.8rem;
         border-radius: 20px;
         font-weight: 700;
         font-size: 0.8rem;
         display: inline-block;
-        letter-spacing: 0.5px;
     }
     
     /* Station Details Lookup Box */
     .station-box {
-        background: linear-gradient(145deg, #161B22, #0D1117);
-        border: 1px solid #30363D;
-        border-radius: 12px;
+        background-color: #F8FAFC;
+        border: 1px solid #CBD5E1;
+        border-radius: 10px;
         padding: 1.5rem;
-        color: #C9D1D9;
+        color: #0F172A;
         margin-top: 1rem;
         margin-bottom: 1.5rem;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
     
     /* Streamlit Tabs Styling */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 20px;
-        background-color: transparent;
+        gap: 15px;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        white-space: pre-wrap;
-        background-color: #161B22;
+        height: 48px;
+        background-color: #F1F5F9;
         border-radius: 8px 8px 0px 0px;
-        gap: 1px;
-        padding-top: 10px;
-        padding-bottom: 10px;
-        padding-left: 20px;
-        padding-right: 20px;
-        color: #8B949E;
+        padding: 10px 20px;
+        color: #475569;
         font-weight: 600;
-        border: 1px solid #30363D;
+        border: 1px solid #E2E8F0;
         border-bottom: none;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #1F242D !important;
-        color: #00F0FF !important;
-        border-top: 3px solid #00F0FF !important;
-        text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-    }
-    
-    /* Sidebar styling */
-    section[data-testid="stSidebar"] {
-        background-color: #161B22;
-        border-right: 1px solid #30363D;
+        background-color: #FFFFFF !important;
+        color: #2563EB !important;
+        border-top: 3px solid #2563EB !important;
+        font-weight: 700;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -278,13 +258,13 @@ if not feed_error and len(df_stations) > 0:
             
             st.markdown(f"""
                 <div class="station-box">
-                    <h3 style="margin-top:0; color:#00F0FF;">📍 {station['name']} — ID: <b>{station['station_id']}</b></h3>
+                    <h3 style="margin-top:0; color:#2563EB;">📍 {station['name']} — ID: <b>{station['station_id']}</b></h3>
                     <p><b>Status:</b> {status_badge} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Total Station Capacity:</b> {station['capacity']} docks</p>
-                    <hr style="border-color: #30363D;">
+                    <hr style="border-color: #CBD5E1;">
                     <div style="display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 1rem;">
-                        <div>🚲 <b>Available Vehicles:</b> <code style="color:#00F0FF; font-size:1.1rem;">{station['num_bikes_available']}</code></div>
-                        <div>🅿️ <b>Open Empty Docks:</b> <code style="color:#2A9D8F; font-size:1.1rem;">{station['num_docks_available']}</code></div>
-                        <div>📊 <b>Station Occupancy:</b> <code style="color:#58A6FF; font-size:1.1rem;">{station['occupancy_pct']}%</code></div>
+                        <div>🚲 <b>Available Vehicles:</b> <code style="color:#1D4ED8; font-size:1.1rem; font-weight:700;">{station['num_bikes_available']}</code></div>
+                        <div>🅿️ <b>Open Empty Docks:</b> <code style="color:#15803D; font-size:1.1rem; font-weight:700;">{station['num_docks_available']}</code></div>
+                        <div>📊 <b>Station Occupancy:</b> <code style="color:#0284C7; font-size:1.1rem; font-weight:700;">{station['occupancy_pct']}%</code></div>
                         <div>📍 <b>GPS Coordinates:</b> <code>{station['lat']}, {station['lon']}</code></div>
                     </div>
                 </div>
@@ -302,7 +282,7 @@ if not feed_error and len(df_stations) > 0:
                 "ScatterplotLayer",
                 data=pd.DataFrame([station]),
                 get_position=["lon", "lat"],
-                get_color=[0, 240, 255, 255],
+                get_color=[37, 99, 235, 255],
                 get_radius=60,
                 pickable=True,
                 stroked=True,
@@ -344,10 +324,10 @@ if not feed_error and len(df_stations) > 0:
         
         with col_map:
             st.markdown("#### Live Geospatial Distribution")
-            st.caption("Cyan = Available Vehicles | Red = Empty Dock Station")
+            st.caption("Blue = Available Vehicles | Red = Empty Dock Station")
             
             map_df = df_stations.copy()
-            map_df["color"] = map_df["occupancy_pct"].apply(lambda p: [0, 240, 255, 200] if p > 20 else [230, 57, 70, 220])
+            map_df["color"] = map_df["occupancy_pct"].apply(lambda p: [37, 99, 235, 200] if p > 20 else [220, 38, 38, 220])
             
             city_coords = CITY_FEEDS[selected_city]
             city_view = pdk.ViewState(
