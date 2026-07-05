@@ -212,15 +212,16 @@ with tab2:
             initial_view_state=city_view,
             tooltip={"text": "Vehicle: {license_plate}\nModel: {car_model}\nStatus: {status}\nDistrict: {district}"}
         )
-        st.pydeck_chart(deck_city)  
-   with col_table:
+        st.pydeck_chart(deck_city)
+        
+    with col_table:
         st.markdown("#### District Aggregations")
         st.caption("Data source: `mart_district_parking_stats`")
         
         display_districts = df_districts[["district", "currently_parked_count", "active_driving_count", "avg_parking_duration_hrs", "parking_utilization_rate"]].copy()
         display_districts.columns = ["District", "Parked", "Driving", "Avg Hrs Parked", "Utilization %"]
-        st.dataframe
-               (
+        
+        st.dataframe(
             display_districts,
             column_config={
                 "Utilization %": st.column_config.ProgressColumn(
@@ -234,7 +235,8 @@ with tab2:
             use_container_width=True,
             hide_index=True,
             height=380,
-             )
+        )
+
 # ==========================================
 # TAB 3: SQL ARCHITECTURE & LOGS
 # ==========================================
