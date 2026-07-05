@@ -219,8 +219,8 @@ with tab2:
         
         display_districts = df_districts[["district", "currently_parked_count", "active_driving_count", "avg_parking_duration_hrs", "parking_utilization_rate"]].copy()
         display_districts.columns = ["District", "Parked", "Driving", "Avg Hrs Parked", "Utilization %"]
-        
-        st.dataframe(
+        st.dataframe
+               (
             display_districts,
             column_config={
                 "Utilization %": st.column_config.ProgressColumn(
@@ -234,7 +234,7 @@ with tab2:
             use_container_width=True,
             hide_index=True,
             height=380,
-        )
+             )
 # ==========================================
 # TAB 3: SQL ARCHITECTURE & LOGS
 # ==========================================
